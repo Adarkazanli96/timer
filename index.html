@@ -35,18 +35,37 @@
   </div>
   <script>
     let state = "idle", prepRemaining = 5, prepInterval = null, countUpInterval = null, startTime = null, audioCtx = null;
-    function playBeep(freq = 600, duration = 0.12) {
-      try {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === "suspended") audioCtx.resume();
-        const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(); osc.stop(audioCtx.currentTime + duration);
-      } catch (e) {}
+function playBeep(freq = 600, duration = 0.12, type = "sine") {
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!audioCtx) {
+      audioCtx = new AudioContextClass();
     }
+    
+    // Resume context if suspended by iOS policy
+    if (audioCtx.state === "suspended") {
+      audioCtx.resume();
+    }
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+    // Linear ramp works more reliably than exponential on iOS WebKit
+    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start(audioCtx.currentTime);
+    osc.stop(audioCtx.currentTime + duration);
+  } catch (e) {
+    console.error("Audio error:", e);
+  }
+}
     function formatTime(ms) {
       const tot = Math.floor(ms / 1000);
       const m = String(Math.floor(tot / 60)).padStart(2, "0");
