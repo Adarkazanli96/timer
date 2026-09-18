@@ -133,7 +133,7 @@
     <p class="hint">Press <strong>Spacebar</strong> to Start / Stop</p>
   </div>
   <script>
-    let state = "idle", prepRemaining = 5, prepInterval = null, countUpInterval = null, startTime = null, audioCtx = null;
+    let state = "idle", prepRemaining = 10, prepInterval = null, countUpInterval = null, startTime = null, audioCtx = null;
     function playBeep(freq = 600, duration = 0.12, type = "sine") {
       try {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -174,7 +174,7 @@
     }
     function toggleTimer() {state === "idle" ? startPrep() : stopTimer();}
     function startPrep() {
-      state = "prep"; prepRemaining = 5;
+      state = "prep"; prepRemaining = 10;
       document.getElementById("startBtn").textContent = "Cancel";
       document.getElementById("badge").textContent = "Get Ready";
       document.getElementById("badge").className = "phase-badge phase-prep";
